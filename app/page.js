@@ -1,65 +1,103 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
+const Home = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("https://dummyjson.com/products");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch products");
+        }
+
+        const data = await response.json();
+        setProducts(data.products);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (loading)
+    return (
+      <div className="bg-[#1b1b1b] min-h-screen flex justify-center items-center text-white">
+        Loading...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="bg-[#1b1b1b] min-h-screen flex justify-center items-center text-red-500">
+        {error}
+      </div>
+    );
+
+  if (products.length === 0)
+    return (
+      <div className="bg-[#1b1b1b] min-h-screen flex justify-center items-center text-white">
+        No Data Found
+      </div>
+    );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.js file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="bg-[#1b1b1b] min-h-screen pt-12">
+
+      <div className="border border-gray-500 w-[720px] h-[420px] ml-24 p-6">
+
+        <div className="flex gap-8">
+
+          {products.slice(0, 3).map((product) => (
+            <Link key={product.id} href={`/product/${product.id}`}>
+
+              <div className="border border-gray-500 w-[100px] h-[150px] p-2 cursor-pointer">
+
+                <img
+                  src={product.thumbnail}
+                  alt={product.title}
+                  className="w-[70px] h-[60px] mx-auto object-cover border border-gray-500"
+                />
+
+                <h2 className="text-[10px] text-center text-white mt-2 truncate">
+                  {product.title}
+                </h2>
+
+                <p className="text-[10px] text-center text-white">
+                  ${product.price}
+                </p>
+
+                <div className="flex justify-center gap-1 mt-2">
+                  {product.tags.slice(0, 2).map((tag, index) => (
+                    <span
+                      key={index}
+                      className="border border-gray-500 text-[8px] text-white px-1"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+              </div>
+
+            </Link>
+          ))}
+
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+
+      </div>
+
     </div>
   );
-}
+};
+
+export default Home;
